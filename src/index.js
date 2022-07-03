@@ -48,7 +48,7 @@ function checksExistsUserAccount(request, response, next) {
 app.get('/todos', checksExistsUserAccount, (request, response) => {
   const { user } = request
 
-  return response.json(user.todos);
+  return response.status(201).json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
@@ -90,8 +90,8 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 });
 
 app.patch('/todos/:id/done/', checksExistsUserAccount, (request, response) => {
-  const { id } = request.query;
-  const { user } = request
+  const { user, url } = request
+  const id = url.split('/')[2];
 
   let newTodo = user.todos.find((todo) => todo.id === id);
 
@@ -110,8 +110,8 @@ app.patch('/todos/:id/done/', checksExistsUserAccount, (request, response) => {
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  const { id } = request.query;
-  const { user } = request
+  const { user, url } = request
+  const id = url.split('/todos/')[1];
 
   const todo = user.todos.find((todo) => todo.id === id)
 
@@ -119,7 +119,6 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
     response.status(404).json({ error: "Task not found" });
   }
 
-  con
   const index = user.todos.indexOf(todo, 0)
 
   user.todos.splice(index, 1);
