@@ -17,10 +17,10 @@ app.post('/users', (request, response) => {
   const id = uuidv4();
 
   if (userAlreadyExists) {
-    return response.status(400).json({ error: "user already exists!" })
+    return response.status(400).json({ error: "Username already exists!" })
   }
 
-  newUser = {
+  const newUser = {
     name,
     username,
     id,
@@ -48,14 +48,14 @@ function checksExistsUserAccount(request, response, next) {
 app.get('/todos', checksExistsUserAccount, (request, response) => {
   const { user } = request
 
-  return response.status(201).json(user.todos);
+  return response.json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body;
   const { user } = request
 
-  newToto = {
+  const newToto = {
     id: uuidv4(),
     title,
     done: false,
@@ -70,7 +70,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body;
-  const { id } = request.query;
+  const { id } = request.params;
   const { user } = request
 
   let newTodo = user.todos.find((todo) => todo.id === id)
@@ -79,19 +79,15 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
     response.status(404).json({ error: "Task not found" });
   }
 
-  const index = user.todos.indexOf(newTodo, 0);
-
   newTodo.title = title;
   newTodo.deadline = new Date(deadline);
 
-  user.todos.splice(index, 1, newTodo)
-
-  return response.status(204).json(newTodo);
+  return response.json(newTodo);
 });
 
 app.patch('/todos/:id/done/', checksExistsUserAccount, (request, response) => {
-  const { user, url } = request
-  const id = url.split('/')[2];
+  const { user } = request
+  const { id } = request.params;
 
   let newTodo = user.todos.find((todo) => todo.id === id);
 
@@ -99,11 +95,7 @@ app.patch('/todos/:id/done/', checksExistsUserAccount, (request, response) => {
     response.status(404).json({ error: "Task not found" });
   }
 
-  const index = user.todos.indexOf(newTodo, 0);
-
   newTodo.done = true;
-
-  user.todos.splice(index, 1, newTodo)
 
   return response.status(204).json({ success: "Task successfully changed" });
 
@@ -126,5 +118,4 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
   return response.status(204).json({ success: "Task deleted successfully" });
 });
 
-app.listen(3333);
 module.exports = app;
